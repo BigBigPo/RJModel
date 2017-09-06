@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13189.4" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="uh2-MW-VIH">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13165.3"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="BTR-cv-Ikh">
+            <objects>
+                <navigationController id="uh2-MW-VIH" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="bQy-Fb-C4b">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="chh-8b-6ZR" kind="relationship" relationship="rootViewController" id="PWE-JH-8RZ"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="KqQ-2p-2gr" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1058" y="161"/>
+        </scene>
+        <!--StudentSheet-->
+        <scene sceneID="HwW-zF-plI">
+            <objects>
+                <viewController id="chh-8b-6ZR" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="1Es-GG-RAG"/>
+                        <viewControllerLayoutGuide type="bottom" id="1X0-ri-oLk"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="f8c-kj-5hn">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" placeholder="search student with name" translatesAutoresizingMaskIntoConstraints="NO" id="ECA-Ml-DNG">
+                                <rect key="frame" x="0.0" y="64" width="375" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="Vo1-PX-A4v"/>
+                                </constraints>
+                                <color key="barTintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="chh-8b-6ZR" id="Von-HG-O34"/>
+                                </connections>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="TQV-Hm-4Yv">
+                                <rect key="frame" x="0.0" y="108" width="375" height="509"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2ee-3d-hgv">
+                                <rect key="frame" x="0.0" y="617" width="179.5" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="7z2-fA-Uf1"/>
+                                </constraints>
+                                <state key="normal" title="Add 1"/>
+                                <connections>
+                                    <action selector="pressAdd1Button:" destination="chh-8b-6ZR" eventType="touchUpInside" id="anq-7x-uAz"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Epm-2f-5tv">
+                                <rect key="frame" x="179.5" y="617" width="179.5" height="50"/>
+                                <state key="normal" title="Add 10"/>
+                                <connections>
+                                    <action selector="pressAdd10Button:" destination="chh-8b-6ZR" eventType="touchUpInside" id="uns-cm-as1"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="ECA-Ml-DNG" secondAttribute="trailing" id="8pt-Cr-HCz"/>
+                            <constraint firstItem="2ee-3d-hgv" firstAttribute="top" secondItem="TQV-Hm-4Yv" secondAttribute="bottom" id="Bga-TV-YCo"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Epm-2f-5tv" secondAttribute="trailing" id="H1Y-4d-KJs"/>
+                            <constraint firstItem="ECA-Ml-DNG" firstAttribute="leading" secondItem="f8c-kj-5hn" secondAttribute="leading" id="QDf-BG-UgL"/>
+                            <constraint firstItem="Epm-2f-5tv" firstAttribute="leading" secondItem="2ee-3d-hgv" secondAttribute="trailing" id="Sxy-Lb-j9v"/>
+                            <constraint firstItem="Epm-2f-5tv" firstAttribute="top" secondItem="2ee-3d-hgv" secondAttribute="top" id="eGy-Tg-VzK"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="TQV-Hm-4Yv" secondAttribute="trailing" constant="-16" id="eyu-hL-ErH"/>
+                            <constraint firstItem="Epm-2f-5tv" firstAttribute="bottom" secondItem="2ee-3d-hgv" secondAttribute="bottom" id="gdk-8Q-2NO"/>
+                            <constraint firstItem="TQV-Hm-4Yv" firstAttribute="leading" secondItem="f8c-kj-5hn" secondAttribute="leadingMargin" constant="-16" id="h0v-0u-dF4"/>
+                            <constraint firstItem="TQV-Hm-4Yv" firstAttribute="top" secondItem="ECA-Ml-DNG" secondAttribute="bottom" id="lU7-jA-Xgu"/>
+                            <constraint firstItem="1X0-ri-oLk" firstAttribute="top" secondItem="2ee-3d-hgv" secondAttribute="bottom" id="ntu-yr-lac"/>
+                            <constraint firstItem="2ee-3d-hgv" firstAttribute="leading" secondItem="f8c-kj-5hn" secondAttribute="leadingMargin" constant="-16" id="oQX-Qn-6cg"/>
+                            <constraint firstItem="Epm-2f-5tv" firstAttribute="width" secondItem="2ee-3d-hgv" secondAttribute="width" id="vcb-8e-RnQ"/>
+                            <constraint firstItem="ECA-Ml-DNG" firstAttribute="top" secondItem="1Es-GG-RAG" secondAttribute="bottom" id="xvO-WI-Kdq"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="StudentSheet" id="wdq-TH-Y57"/>
+                    <connections>
+                        <outlet property="add10Button" destination="Epm-2f-5tv" id="I0h-w8-U23"/>
+                        <outlet property="add1Button" destination="2ee-3d-hgv" id="gK1-7P-I9Y"/>
+                        <outlet property="searchBar" destination="ECA-Ml-DNG" id="skG-sU-JTM"/>
+                        <outlet property="searchDisplayController" destination="FdF-q6-PLT" id="CqD-ga-r6J"/>
+                        <outlet property="tableView" destination="TQV-Hm-4Yv" id="4zJ-AY-jKh"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lpl-sK-awk" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="qyu-i4-ajg">
+                    <connections>
+                        <outlet property="delegate" destination="chh-8b-6ZR" id="cr3-Uf-b8Q"/>
+                        <outlet property="searchContentsController" destination="chh-8b-6ZR" id="tBc-bX-KGy"/>
+                        <outlet property="searchResultsDataSource" destination="chh-8b-6ZR" id="vHm-lw-JHr"/>
+                        <outlet property="searchResultsDelegate" destination="chh-8b-6ZR" id="b5p-iJ-I15"/>
+                    </connections>
+                </searchDisplayController>
+                <searchDisplayController id="FdF-q6-PLT">
+                    <connections>
+                        <outlet property="delegate" destination="chh-8b-6ZR" id="VgB-1b-yWo"/>
+                        <outlet property="searchBar" destination="ECA-Ml-DNG" id="TcW-yd-onm"/>
+                        <outlet property="searchContentsController" destination="chh-8b-6ZR" id="R1B-3Z-FhL"/>
+                        <outlet property="searchResultsDataSource" destination="chh-8b-6ZR" id="27L-GH-GzC"/>
+                        <outlet property="searchResultsDelegate" destination="chh-8b-6ZR" id="t0B-6e-xTG"/>
+                    </connections>
+                </searchDisplayController>
+            </objects>
+            <point key="canvasLocation" x="988" y="152"/>
+        </scene>
+    </scenes>
+</document>
