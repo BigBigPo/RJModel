@@ -30,7 +30,7 @@
  @param error 错误信息
  */
 - (BOOL)createTableWithName:(NSString *)tableName propertyKey:(NSArray *)propertys error:(NSError **)error;
-
+- (BOOL)updateTableName:(NSString *)tableName propertys:(NSArray *)propertys;
 
 /**
  清空表

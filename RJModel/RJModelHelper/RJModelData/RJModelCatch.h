@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-
+@class RJModel;
 @interface RJModelData : NSObject
 @property (strong, nonatomic) NSArray * propertys;
 @property (strong, nonatomic) NSArray * types;
+
+@property (strong, nonatomic) NSDictionary * propertyTypeDic;           //Property : Type
 @end
 
 @interface RJModelCatch : NSObject
@@ -27,18 +29,18 @@
 
  @param propertys 属性集合
  @param types 属性类型集合
- @param talbeName 表名
+ @param name 表名
  */
-- (void)saveCatchWithPropertys:(NSArray *)propertys types:(NSArray *)types talbeName:(NSString *)talbeName;
+- (void)saveCatchWithPropertys:(NSArray *)propertys types:(NSArray *)types className:(NSString *)name;
 
 
 /**
  从缓存中获取类的属性列表及其类型
  
- @param tableName 表名
+ @param name 表名
  @return 数据
  */
-- (RJModelData *)getPropertysAndTypesWithTableName:(NSString *)tableName;
+- (RJModelData *)getPropertysAndTypesWithClassName:(NSString *)name;
 @end
 
 

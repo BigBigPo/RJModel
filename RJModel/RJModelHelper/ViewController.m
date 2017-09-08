@@ -28,10 +28,11 @@
     [_searchBar setDelegate:self];
     
     [self updateData];
+//    [RJCellModel drapLocationTable];
 }
 
 - (void)updateData {
-     _allDatas = [NSArray arrayWithArray:[RJCellModel getAllModelsWithOrder:@"number DESC"]];
+     _allDatas = [NSArray arrayWithArray:[RJCellModel getModelsWithOrder:@"number DESC"]];
     [_tableView reloadData];
 }
 
@@ -130,7 +131,7 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     NSString * whereString = [NSString stringWithFormat:@"number like '%%%@%%'", searchText];
     //升序排列
-    _searchDatas = [RJCellModel getAllModelsWithWhere:whereString order:@"number ASC"];
+    _searchDatas = [RJCellModel getModelsWithWhere:whereString order:@"number ASC"];
 }
 
 #pragma mark - get 1 data

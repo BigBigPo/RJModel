@@ -81,6 +81,18 @@ static RJFMDBHelper * rjFMDBHelper = nil;
     return [self p_executeUpdateWithSqlString:sqlString db:_db error:error];
 }
 
+- (BOOL)updateTableName:(NSString *)tableName propertys:(NSArray *)propertys {
+    for (NSString * property in propertys) {
+        if(![_db columnExists:property inTableWithName:tableName]) {
+            NSString * sqlString = [NSString stringWithFormat:@"ALTER TABLE %@ ADD %@", tableName, property];
+            if(![self p_executeUpdateWithSqlString:sqlString db:_db error:nil]) {
+                return NO;
+            }
+        }
+    }
+    return YES;
+}
+
 - (BOOL)clearTableWithName:(NSString *)tableName error:(NSError **)error {
     NSString *sqlstring = [NSString stringWithFormat:@"DELETE FROM %@", tableName];
     if (![self p_executeUpdateWithSqlString:sqlstring db:_db error:error])
@@ -107,12 +119,17 @@ static RJFMDBHelper * rjFMDBHelper = nil;
 
 - (BOOL)insertDataWithTableName:(NSString *)tableName propertys:(NSArray *)propertys values:(NSArray *)values error:(NSError **)error {
     
-    NSString * propertyString = [propertys componentsJoinedByString:@", "];
-    NSString * valueString = [values componentsJoinedByString:@", "];
+    NSString * propertyString = [propertys componentsJoinedByString:@","];
+
+    NSMutableArray * temp = [NSMutableArray array];
+    for (NSInteger count = 0; count < propertys.count; count ++) {
+        [temp addObject:@"?"];
+    }
+    NSString * vlaueString = [temp componentsJoinedByString:@","];
     
-    NSString * sqlString = [NSString stringWithFormat:@"insert into %@ (%@) values(%@);", tableName, propertyString, valueString];
+    NSString * sqlString = [NSString stringWithFormat:@"insert into %@ (%@) values(%@);", tableName, propertyString, vlaueString];
     
-    return [self p_executeUpdateWithSqlString:sqlString db:_db error:error];
+    return [self p_executeUpdateWithSqlString:sqlString values:values db:_db error:error];
 }
 
 - (NSArray *)searchDataWithTableName:(NSString *)tableName whereString:(NSString *)whereString propertys:(NSArray *)propertys error:(NSError **)error {
@@ -192,6 +209,11 @@ static RJFMDBHelper * rjFMDBHelper = nil;
     return result;
 }
 
+- (BOOL)p_executeUpdateWithSqlString:(NSString *)sqlString values:(NSArray *)values db:(FMDatabase *)db error:(NSError **)error {
+    BOOL result = [db executeUpdate:sqlString values:values error:error];
+    return result;
+}
+
 - (NSArray *)p_executeQueryWithSQLString:(NSString *)sqlString db:(FMDatabase *)db propertys:(NSArray *)propertys error:(NSError **)error {
     NSMutableArray * datas = [NSMutableArray array];
     FMResultSet *rs = [_db executeQuery:sqlString];
@@ -200,7 +222,7 @@ static RJFMDBHelper * rjFMDBHelper = nil;
         NSInteger idNum = [rs intForColumn:@"id"];
         [dic setObject:@(idNum) forKey:@"idNum"];
         for (NSString * property in propertys) {
-            NSString * value = [rs stringForColumn:property];
+            NSString * value = [rs objectForColumnName:property];
             if (!value) {
                 value = @"";
             }

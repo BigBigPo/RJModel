@@ -9,7 +9,7 @@
 #import "RJModel.h"
 #import "RJModelCatch.h"
 #import "RJDataHelper.h"
-#import "NSObject+RJObject.h"
+
 @interface RJModel()
 
 @end
@@ -19,14 +19,88 @@
 {
     self = [super init];
     if (self) {
-        _dataTableName = [[self class] getTableDataName];
-        RJModelData * modelData = [[self class] getPropertyAndType];
-        if (modelData) {
-            _propertysArray = modelData.propertys;
-            _typesArray = modelData.types;
+        [self initData];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [self initData];
+    for (NSInteger count = 0; count < _propertysArray.count; count ++) {
+        id value = [self valueForKey:_propertysArray[count]];
+        [aCoder encodeObject:value forKey:_propertysArray[count]];
+    }
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super init]) {
+        [self initData];
+        for (NSInteger count = 0; count < _propertysArray.count; count ++) {
+            id key = _propertysArray[count];
+            [self setValue:[aDecoder decodeObjectForKey:key] forKey:key];
         }
     }
     return self;
+}
+
+- (void)initData {
+    _dataTableName = [[self class] getTableDataName];
+    RJModelData * modelData = [[self class] getPropertyAndType];
+    if (modelData) {
+        _propertysArray = modelData.propertys;
+        _typesArray = modelData.types;
+        _propertyTypeDic = [NSDictionary dictionaryWithObjects:modelData.types
+                                                       forKeys:modelData.propertys];
+    }
+}
+
+/**
+ 建表
+ 检测模型表是否存在，否则创建
+ */
++ (BOOL)createLocationTable {
+    __block BOOL result = NO;
+    __block NSString * tableName = [self getTableDataName];
+    __block RJModelData * modelData = [self getPropertyAndType];
+    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
+        NSError * error = nil;
+        //检查表是否存在
+        if(![helper checkHadTable:tableName result:&error]) {
+            //创建表
+            if (![helper createTableWithName:tableName propertyKey:modelData.propertys error:&error]) {
+                NSLog(@"%@", error.description);
+            }
+        } else if (error){
+            NSLog(@"[%@] %@",tableName, error.description);
+        } else {
+            //同步字段名
+            [helper updateTableName:tableName propertys:modelData.propertys];
+            result = YES;
+        }
+    }];
+    return result;
+}
+
++ (BOOL)clearLocationTable {
+    __block BOOL result = NO;
+    __block NSString * tableName = [self getTableDataName];
+    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
+        NSError * error = nil;
+        result = [helper clearTableWithName:tableName error:&error];
+    }];
+    return result;
+}
+
++ (BOOL)drapLocationTable {
+    __block BOOL result = NO;
+    __block NSString * tableName = [self getTableDataName];
+    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
+        NSError * error = nil;
+        result = [helper dropTableWithName:tableName error:&error];
+    }];
+    return result;
 }
 
 #pragma mark - function
@@ -48,7 +122,6 @@
     //查看数据是否存在，若存在则更新，不存在则插入
     [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
         result =[wself saveAndUpdateDataWithHelper:helper whereString:whereString];
-        
         NSInteger idNum = [helper lastInsertRowID];
         wself.idNum = idNum;
     }];
@@ -101,47 +174,43 @@
     return result;
 }
 
-+ (NSArray *)getAllModels {
-    return [self getAllModelsWithWhere:nil order:nil];
++ (NSArray *)getModels {
+    return [self getModelsWithWhere:nil order:nil];
 }
 
-+ (NSArray *)getAllModelsWithWhere:(NSString *)whereString {
-    return [self getAllModelsWithWhere:whereString order:nil];
++ (NSArray *)getModelsWithWhere:(NSString *)whereString {
+    return [self getModelsWithWhere:whereString order:nil];
 }
 
-+ (NSArray *)getAllModelsWithOrder:(NSString *)order {
-    return [self getAllModelsWithWhere:nil order:order];
++ (NSArray *)getModelsWithOrder:(NSString *)order {
+    return [self getModelsWithWhere:nil order:order];
 }
 
-+ (NSArray *)getAllModelsWithWhere:(NSString *)whereString order:(NSString *)order {
-    __block NSArray * models = [NSArray array];
++ (NSArray *)getModelsWithWhere:(NSString *)whereString order:(NSString *)order {
+    __block NSArray * datas = [NSArray array];
     __block BOOL result = YES;
+    __block NSString * tableName = [self getTableDataName];
     [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
-        NSError * error = nil;
+        
         
         RJModelData * modelData = [self getPropertyAndType];
-        
-        models = [helper searchDataWithTableName:[self getTableDataName] whereString:whereString propertys:modelData.propertys order:order error:&error];
-        if (error) {
+        //同步字段
+        if(![helper updateTableName:tableName propertys:modelData.propertys]) {
             result = NO;
-            NSLog(@"%@", error.description);
+        } else {
+            NSError * error = nil;
+            datas = [helper searchDataWithTableName:tableName whereString:whereString propertys:modelData.propertys order:order error:&error];
+            if (error) {
+                result = NO;
+                NSLog(@"%@", error.description);
+            }
         }
     }];
     
     if (!result) {
         return nil;
     }
-    
-    NSMutableArray * temp = [NSMutableArray array];
-    for (NSDictionary * dic in models) {
-        RJModel * model = [[self alloc] init];
-        for (NSString * property in [dic allKeys]) {
-            [model setValue:dic[property] forKey:property];
-        }
-        [temp addObject:model];
-    }
-    return [temp copy];;
-    
+    return [self getModelWithDatas:datas];
 }
 
 - (BOOL)deleteSelf {
@@ -234,8 +303,18 @@
     NSMutableArray * temp = [NSMutableArray array];
     for (NSInteger i = 0; i < _propertysArray.count; i ++) {
         NSString * property = _propertysArray[i];
-        NSString * value = [NSString stringWithFormat:@"%@",[self valueForKeyPath:property]];
-        [temp addObject:value];
+        id value = [self valueForKey:property];
+        if (value) {
+            if ([value isKindOfClass:[RJModel class]]) {
+                NSData * data = [NSKeyedArchiver archivedDataWithRootObject:value];
+                [temp addObject:data];
+                continue;
+            }
+            [temp addObject:value];
+        } else {
+            [temp addObject:[NSNull null]];
+        }
+        
     }
     return [temp copy];
 }
@@ -245,65 +324,37 @@
  获取属性与属性类型的数据，并缓存起来，每一次获取都优先从缓存中查找。
  */
 + (RJModelData *)getPropertyAndType {
-    RJModelData * data = [[RJModelCatch shareHelper] getPropertysAndTypesWithTableName:[self getTableDataName]];
-    if (data) {
-        return data;
-    }
-    
-    NSArray * names = nil;
-    NSArray * types = nil;
-    [self getSelfPropertyWithName:&names type:&types];
-    
-    if (names && types) {
-        data = [[RJModelData alloc] init];
-        data.propertys = names;
-        data.types = types;
-        return data;
-    }
-    return nil;
+    RJModelData * data = [[RJModelCatch shareHelper] getPropertysAndTypesWithClassName:NSStringFromClass(self)];
+    return data;
 }
 
-/**
- 建表
- 检测模型表是否存在，否则创建
- */
-+ (BOOL)createLocationTable {
-    __block BOOL result = NO;
-    __block NSString * tableName = [self getTableDataName];
-    __block RJModelData * modelData = [self getPropertyAndType];
-    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
-        NSError * error = nil;
-        if(![helper checkHadTable:tableName result:&error]) {
-            if (![helper createTableWithName:tableName propertyKey:modelData.propertys error:&error]) {
-                NSLog(@"%@", error.description);
-            }
-        } else if (error){
-            NSLog(@"[%@] %@",tableName, error.description);
-        } else {
-            result = YES;
++ (NSArray *)getModelWithDatas:(NSArray *)datas {
+    NSMutableArray * temp = [NSMutableArray array];
+    for (NSDictionary * dic in datas) {
+        RJModel * model = [[self alloc] init];
+        //遍历所有属性
+        NSArray * allPropertys = [dic allKeys];
+        for (NSInteger count = 0; count < allPropertys.count; count ++) {
+            NSString * property = allPropertys[count];
+            id value = dic[property];
+            [model rj_setValue:value forKey:property];
         }
-    }];
-    return result;
+        [temp addObject:model];
+    }
+    return [temp copy];
 }
 
-+ (BOOL)clearLocationTable {
-    __block BOOL result = NO;
-    __block NSString * tableName = [self getTableDataName];
-    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
-        NSError * error = nil;
-        result = [helper clearTableWithName:tableName error:&error];
-    }];
-    return result;
-}
-
-+ (BOOL)drapLocationTable {
-    __block BOOL result = NO;
-    __block NSString * tableName = [self getTableDataName];
-    [RJDataHelper runDataHelper:^(id<RJDataHelperDelegate> helper) {
-        NSError * error = nil;
-        result = [helper dropTableWithName:tableName error:&error];
-    }];
-    return result;
+- (void)rj_setValue:(id)value forKey:(NSString *)key{
+    id data = value;
+    if ([value isKindOfClass:[RJModel class]]) {
+        data = [NSKeyedUnarchiver unarchiveObjectWithData:value];
+    }
+    
+    if (data == [NSNull null] || data == nil) {
+        [self setValue:nil forKey:key];
+        return;
+    }
+    [self setValue:data forKey:key];
 }
 @end
 
